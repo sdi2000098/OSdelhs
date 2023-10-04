@@ -28,7 +28,7 @@ using namespace std;
                 return Pin;
             }
             
-            int DisplayVoter(){
+            void DisplayVoter(){
                 cout << "Pin : " << Pin;
                 cout << "Name : " << name;
                 cout << "Surname : " << surname;
@@ -36,14 +36,14 @@ using namespace std;
                 cout << "Voted : " << HasVoted;
             }
 
-            int SetVote(){
+            void SetVote(){
                 if (HasVoted){
                     cout << "Already Voted";
-                    return 0;
+                    return;
                 }
                 HaveVoted++;
                 HasVoted = true;
-                return 0;
+                return;
             }
         private : 
             int Pin,PostCode;
@@ -53,7 +53,7 @@ using namespace std;
 
     
 
-    int Initialize (int BucketsNum){
+    int Initialize (int KeysPerBucket){
         
         return 0;
     }

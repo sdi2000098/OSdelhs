@@ -10,4 +10,14 @@
     int PrintPostalCodes (void);
     int Exit(void);
 
-#endif      asf
+    class Voter{
+        public : 
+            Voter(int Pin, const char * surname, const char * name, int PostCode);
+            ~Voter();
+            int GetPin();
+            int DisplayVoter();
+            int SetVote();
+    };
+
+
+#endif 

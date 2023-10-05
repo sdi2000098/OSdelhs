@@ -2,10 +2,12 @@
 #include <iostream>
 #include <math.h>
 
-#define ERROR 1
+#define ERROR -1
 using namespace std;
 
-
+static int KeysPerBucket;
+class HashTable;
+static HashTable * MyHash;
 
 class Bucket {
     public :
@@ -26,20 +28,7 @@ class Bucket {
                 Records[ItemsStored++] = item;
             }
         }
-        void Split(){
-            Item * temp;
-            ItemsStored = 0;
-            for (int i = 0; i< KeysPerBucket;i++){
-                temp = Records[i];
-                if (temp == NULL)
-                    break;
-                Records[i] =NULL;
-                int ItemPos = temp->GetPin() % MyHash->HashValue1;
-                MyHash->InsertItem(ItemPos,temp);
-            }
-            if(NextBucket != NULL)
-                NextBucket->Split();
-        }
+        void Split();
         int Find(int Pin){
             for(int i = 0 ; i< KeysPerBucket;i++){
                 if(Records[i] == NULL)
@@ -59,6 +48,7 @@ class Bucket {
                     return ERROR;
                 if (Records[i]->GetPin() == Pin){
                     Records[i]->SetVote();
+                    AddVote(Records[i]->GetZip());
                     return 0;
                 }
             }
@@ -146,8 +136,21 @@ class HashTable {
         }
 };
 
-static int KeysPerBucket;
-static HashTable * MyHash;
+void Bucket::Split(){
+    Item * temp;
+    ItemsStored = 0;
+    for (int i = 0; i< KeysPerBucket;i++){
+        temp = Records[i];
+        if (temp == NULL)
+            break;
+        Records[i] =NULL;
+        int ItemPos = temp->GetPin() % MyHash->HashValue1;
+        MyHash->InsertItem(ItemPos,temp);
+    }
+    if(NextBucket != NULL)
+        NextBucket->Split();
+}
+
 
 int Initialize (int x){
     if (x <= 0){
@@ -159,7 +162,7 @@ int Initialize (int x){
     return 0;
 }
 
-int Insert (Item  * item) {
+void Insert (Item  * item) {
     int ItemPos = item->GetPin() % MyHash->HashValue1;
     if (ItemPos < MyHash->NextSplit)
         ItemPos = item->GetPin() % MyHash->HashValue2;
@@ -183,6 +186,6 @@ int ChangeItem(int Pin){
     return MyHash->Change(ItemPos,Pin);
 }
 
-int Exit(){
+void ExitHash(void){
     delete MyHash;
 }

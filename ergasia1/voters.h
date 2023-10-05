@@ -7,16 +7,22 @@
     int SetVoted(int Pin);
     int NumberOfVoters (void);
     int NumberOfYesVoters (void);
-    int PrintPostalCodes (void);
-    int Exit(void);
+    void PrintPostalCodes(void);
+    int PrintAllFromZip(int Zip);
+    int ExitProg(void);
 
     class Voter{
         public : 
             Voter(int Pin, const char * surname, const char * name, int PostCode);
             ~Voter();
             int GetPin();
-            int DisplayVoter();
-            int SetVote();
+            void DisplayVoter();
+            void SetVote();
+            int GetZip();
+        private : 
+            int Pin,PostCode;
+            char *name,*surname;
+            bool HasVoted;
     };
 
 

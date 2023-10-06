@@ -90,7 +90,7 @@ void Operate(void) {
                 cout << "Wrong number of arguments in input\n";
                 continue;
             }
-            cout << "Total number of participants that have already voted : " << NumberOfVoters << "\n";
+            cout << "Total number of participants that have already voted : " << NumberOfVoters() << "\n";
         }
         else if (strcmp(tokens[0],"o") == 0)
         {
@@ -140,7 +140,7 @@ int main(int argc, char **argv){
         cout << "Wrong number of arguments!\n";
         return ERROR;
     }
-    for (int i = 0; i < strlen(argv[4]); i++) {
+    for (int i = 0; i < (int)strlen(argv[4]); i++) {
       if(! isdigit(argv[4][i])){
         cout<<"Expected an int for keys per bucket but got : " << argv[4] << "\n";
         return ERROR;

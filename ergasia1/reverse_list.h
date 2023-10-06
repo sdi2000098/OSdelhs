@@ -7,9 +7,7 @@
     void InsertList(Item * item);
     int VotersFromZip(int Zip);
     void DisplayZips(void);
-    void ExitList(void);
-    void AddVote(int Zip);
     int PrintAllFromZip(int Zip);
-    
+    void ExitList(void);
     
 #endif

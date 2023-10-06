@@ -140,6 +140,13 @@ int main(int argc, char **argv){
         cout << "Wrong number of arguments!\n";
         return ERROR;
     }
+    for (int i = 0; i < strlen(argv[4]); i++) {
+      if(! isdigit(argv[4][i])){
+        cout<<"Expected an int for keys per bucket but got : " << argv[4] << "\n";
+        return ERROR;
+      }
+
+   }
     if (Initialize(atoi(argv[4])))
         return ERROR;
     ifstream file;

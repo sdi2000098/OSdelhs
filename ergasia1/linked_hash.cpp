@@ -60,7 +60,6 @@ class Bucket {
                     return ERROR;
                 if (Records[i]->GetPin() == Pin){
                     Records[i]->SetVote();
-                    AddVote(Records[i]->GetZip());
                     return 0;
                 }
             }
@@ -91,14 +90,14 @@ class HashTable {
         int HashValue1;
         int HashValue2;
         int TotalRecords;
-        HashTable() : round(0),NextSplit(0),Size(2), TotalRecords(0),PrevSize(2){
+        HashTable() : round(0), PrevSize(2),NextSplit(0), Size(2),  TotalRecords(0) {
             HashBackets = (Bucket **) malloc(sizeof(Bucket *) * Size);
             for(int i = 0 ; i < Size ; i++ )
                 HashBackets[i] = new Bucket;
             HashValue1 = (int)(pow(2,round)) * Size;
             HashValue2 = (int)(pow(2,round + 1)) * Size;
-        }
-        void InsertItem(int BucketPos,Item * item){
+            }
+            void InsertItem(int BucketPos,Item * item){
             HashBackets[BucketPos]->InsertIem(item);
             TotalRecords++;
         }
@@ -167,7 +166,7 @@ void Bucket::Split(){
 }
 
 
-int Initialize (int x){
+int InitializeHash (int x){
     if (x <= 0){
         cout << "Keys per Bucket must be an integer greater than zero, you inserted " << x << "\n";
         return ERROR;
@@ -190,7 +189,7 @@ void Insert (Item  * item) {
 int Find(int Pin){          // Returns 0 if record is displayed ERROR otherwise
     int ItemPos = Pin % MyHash->HashValue1;
     if (ItemPos < MyHash->NextSplit)
-        ItemPos = Pin % MyHash->HashValue2;•••••••••••••
+        ItemPos = Pin % MyHash->HashValue2;
     return MyHash->Find(ItemPos,Pin);
 }
 Item * FindRecord(int Pin){
@@ -207,9 +206,10 @@ int ChangeItem(int Pin){
     Item * ToInsert = FindRecord(Pin);
     if (ToInsert == NULL){
         cout << "There is no candiatte with Pin : " << Pin << "\n";
-        return Error;
+        return ERROR;
     }
     InsertList(ToInsert);
+    return 0;
 }
 
 void ExitHash(void){

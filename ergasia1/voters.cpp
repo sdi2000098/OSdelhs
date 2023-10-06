@@ -52,7 +52,6 @@ using namespace std;
     int CreateVoter(int Pin, char * surname, char * name, int PostCode){
         Item * ToInsert = new Voter(Pin,surname,name,PostCode);
         Insert(ToInsert);
-        InsertList(ToInsert);
         VotersNumber++;
         return 0;
     }

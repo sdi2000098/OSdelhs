@@ -42,6 +42,18 @@ class Bucket {
                 return ERROR;
             return NextBucket->Find(Pin);
         }
+        Item * FindRecord( int Pin){
+            for(int i = 0 ; i< KeysPerBucket;i++){
+                if(Records[i] == NULL)
+                    return NULL;
+                if (Records[i]->GetPin() == Pin){
+                    return Records[i];
+                }
+            }
+            if (NextBucket == NULL)
+                return NULL;
+            return NextBucket->FindRecord(Pin);
+        }
         int Change(int Pin){
             for(int i = 0 ; i< KeysPerBucket;i++){
                 if(Records[i] == NULL)
@@ -126,6 +138,9 @@ class HashTable {
         int Find(int ItemPos, int Pin){
             return HashBackets[ItemPos]->Find(Pin);
         }
+        Item * FindRecord(int ItemPos, int Pin){
+            return HashBackets[ItemPos]->FindRecord(Pin);
+        }
         int Change(int ItemPos, int Pin){
             return HashBackets[ItemPos]->Change(Pin);
         }
@@ -154,7 +169,7 @@ void Bucket::Split(){
 
 int Initialize (int x){
     if (x <= 0){
-        cout << "Keys per Bucket must be an integer greater than zero, youj inserted " << x << "\n";
+        cout << "Keys per Bucket must be an integer greater than zero, you inserted " << x << "\n";
         return ERROR;
     }
     KeysPerBucket = x;
@@ -175,15 +190,26 @@ void Insert (Item  * item) {
 int Find(int Pin){          // Returns 0 if record is displayed ERROR otherwise
     int ItemPos = Pin % MyHash->HashValue1;
     if (ItemPos < MyHash->NextSplit)
-        ItemPos = Pin % MyHash->HashValue2;
+        ItemPos = Pin % MyHash->HashValue2;•••••••••••••
     return MyHash->Find(ItemPos,Pin);
 }
-
+Item * FindRecord(int Pin){
+    int ItemPos = Pin % MyHash->HashValue1;
+    if (ItemPos < MyHash->NextSplit)
+        ItemPos = Pin % MyHash->HashValue2;
+    return MyHash->FindRecord(ItemPos,Pin);
+}
 int ChangeItem(int Pin){
     int ItemPos = Pin % MyHash->HashValue1;
     if (ItemPos < MyHash->NextSplit)
         ItemPos = Pin % MyHash->HashValue2;
-    return MyHash->Change(ItemPos,Pin);
+    MyHash->Change(ItemPos,Pin);
+    Item * ToInsert = FindRecord(Pin);
+    if (ToInsert == NULL){
+        cout << "There is no candiatte with Pin : " << Pin << "\n";
+        return Error;
+    }
+    InsertList(ToInsert);
 }
 
 void ExitHash(void){

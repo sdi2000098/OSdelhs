@@ -7,7 +7,7 @@ struct ItemNode{
 };
 
 struct ZipNode{
-    int Zip, NumberOfItems,HaveVoted;
+    int Zip, NumberOfItems;
     ZipNode * Next;
     ItemNode * Items;
 };
@@ -24,7 +24,6 @@ ZipNode * CreateNewZip(Item * item, ZipNode * Next,int Zip){
     ToReturn->Items->Next = NULL;
     ToReturn->Next = Next;
     ToReturn->NumberOfItems = 1;
-    ToReturn->HaveVoted = 0;
     ToReturn->Zip = Zip;
     return ToReturn;
 }
@@ -35,7 +34,7 @@ void InsertList(Item * item){
         Head = CreateNewZip(item,NULL,item->GetZip());
         return;
     }
-    ZipNode * temp = Head;
+    ZipNode * temp = Head,*PrevZip = NULL;
     while(temp != NULL){
         if(temp->Zip == item->GetZip()){
             temp->NumberOfItems++;
@@ -49,8 +48,22 @@ void InsertList(Item * item){
             prev->Next = (ItemNode*)malloc(sizeof(ItemNode));
             prev->Next->item = item;
             prev->Next->Next = NULL;
+            if (prev != NULL){          //If null we are in head node and we are done
+                PrevZip->Next = temp->Next;
+                ZipNode * Position2 = Head, * Position1 = NULL; 
+                while (Position2 != NULL && Position2->NumberOfItems > temp->NumberOfItems){
+                    Position1 = Position2;
+                    Position2 = Position2->Next;
+                }
+                Position1->Next = temp;
+                temp->Next = Position2;
+
+            }
             return;
         }
+        PrevZip = temp;
+        temp = temp->Next;
+
     }
     temp = CreateNewZip(item,NULL,item->GetZip());
 }
@@ -68,6 +81,7 @@ int VotersFromZip(int Zip){
             }
             return 0;
         }
+        temp = temp->Next;
     }
     std::cout << "There are no voters for the zip code " << Zip << ".\n";
     return ERROR;
@@ -78,45 +92,15 @@ void DisplayZips(void){
         std::cout << "No one has voted yet!\n";
         return;
     }
-    int max,prevmax;
-    ZipNode * temp ;
-    
-    max = Head->NumberOfItems;
-    prevmax = 0;
-    for (int i = 0 ; i < TotalZips;){
-        temp = Head;
-        while (temp != NULL)
-        {      
-            if (temp->NumberOfItems > max && (i==0 || temp->NumberOfItems < prevmax))
-                max = temp->NumberOfItems;
-            temp = temp->Next;
-        }
-        temp = Head;
-        while( temp != NULL){
-            if (temp->NumberOfItems == max){
-                i++;
-                std ::cout << "Zip : " << temp->Zip << " Have voted : " << temp->HaveVoted;
-            }
-            temp = temp->Next;
-        }
-        prevmax = max;
-        max = 0;
-    }
-    
-}
-
-
-void AddVote(int Zip){
-    ZipNode * temp = Head;
-    while (temp!= NULL)
+    ZipNode * temp = Head ;
+    while (temp!=NULL)
     {
-        if(temp->Zip == Zip){
-            temp->HaveVoted++;
-            return;
-        }
+        std::cout << "There are voters from zip " << temp->Zip << ", total : " << temp->NumberOfItems << "\n";
+        temp = temp->Next;
     }
-    
 }
+
+
 
 void ExitList(void){
     ZipNode * temp = Head,*ToDelete;
@@ -127,9 +111,10 @@ void ExitList(void){
         {
             ToDelete2 = temp2;
             temp2 = temp2->Next;
-            delete ToDelete;
+            delete ToDelete2;
         }
         ToDelete = temp;
         temp = temp->Next;
+        delete ToDelete;
     }
 }

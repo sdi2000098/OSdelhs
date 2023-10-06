@@ -11,24 +11,25 @@ static HashTable * MyHash;
 
 class Bucket {
     public :
-        Item ** Records;
-        Bucket * NextBucket;
-        int ItemsStored;
+        Item ** Records;                    
+        //An array of indexes to Items, when this array reaches KeysPerBucket indexes, a new bucket is created and linked with the current bucket via NextBucker
+        Bucket * NextBucket;        //Pointer to next bucket
+        int ItemsStored;            //#items stored in bucket
         Bucket() : ItemsStored(0){
             Records = (Item**)malloc(KeysPerBucket*sizeof(Item*));
             NextBucket = NULL;
         }
         void InsertIem(Item * item){
-            if (ItemsStored == KeysPerBucket){
+            if (ItemsStored == KeysPerBucket){            //Bucket is full
                 if (NextBucket == NULL)
                     NextBucket = new Bucket;
-                NextBucket->InsertIem(item);
+                NextBucket->InsertIem(item);                //Insert the item to the bucket created
             }
             else{
-                Records[ItemsStored++] = item;
+                Records[ItemsStored++] = item;              //Bucket is not full, insert to the free space
             }
         }
-        void Split();
+        void Split();            //Will be defined later
         int Find(int Pin){
             for(int i = 0 ; i< KeysPerBucket;i++){
                 if(Records[i] == NULL)

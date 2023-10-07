@@ -100,9 +100,10 @@ class HashTable {
             for(int i = 0 ; i < Size ; i++ )
                 HashBackets[i] = new Bucket;
             HashValue1 = (int)(pow(2,round)) * Size;
+            //h = 2^round * size
             HashValue2 = (int)(pow(2,round + 1)) * Size;
         }
-        void InsertItem(int BucketPos,Item * item){
+        void InsertItem(int BucketPos,Item * item){    //Inserts item to the given bucket
             HashBackets[BucketPos]->InsertIem(item);
             TotalRecords++;
         }

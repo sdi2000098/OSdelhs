@@ -21,7 +21,7 @@ class Bucket {
         }
         void InsertIem(Item * item){
             if (ItemsStored == KeysPerBucket){            //Bucket is full
-                if (NextBucket == NULL)
+                if (NextBucket == NULL)                   //if there is no next bucket, create one
                     NextBucket = new Bucket;
                 NextBucket->InsertIem(item);                //Insert the item to the bucket created
             }
@@ -31,7 +31,7 @@ class Bucket {
         }
         void Split();            //Will be defined later
         int Find(int Pin){
-            for(int i = 0 ; i< KeysPerBucket;i++){
+            for(int i = 0 ; i< KeysPerBucket;i++){       //Check all records in the bucket
                 if(Records[i] == NULL)
                     return ERROR;
                 if (Records[i]->GetPin() == Pin){
@@ -41,9 +41,11 @@ class Bucket {
             }
             if (NextBucket == NULL)
                 return ERROR;
-            return NextBucket->Find(Pin);
+            return NextBucket->Find(Pin);    // If not foun yet check next bucket
         }
-        Item * FindRecord( int Pin){
+        Item * FindRecord( int Pin){         // Function that given pin returns item
+            //This is needed when vote is changed to yes
+            //given pin the appropriate item needs to be inserted to the inverted list
             for(int i = 0 ; i< KeysPerBucket;i++){
                 if(Records[i] == NULL)
                     return NULL;
@@ -55,7 +57,7 @@ class Bucket {
                 return NULL;
             return NextBucket->FindRecord(Pin);
         }
-        int Change(int Pin){
+        int Change(int Pin){  //Changes vote to yes
             for(int i = 0 ; i< KeysPerBucket;i++){
                 if(Records[i] == NULL)
                     return ERROR;
@@ -80,25 +82,27 @@ class Bucket {
         }
 };
 
-class HashTable {
+class HashTable {  
     private: 
         int round;
-        int PrevSize;
-        Bucket ** HashBackets;
+        int PrevSize;  //This variable indicates the previous size of the table in which hash functions changed value 
+        Bucket ** HashBackets;  //Array of hash buckets 
     public : 
-        int NextSplit;
-        int Size;
-        int HashValue1;
-        int HashValue2;
+        int NextSplit;     //Points to the bucket that is going to be split if needed 
+        int Size;       // Current size of hash table
+        int HashValue1;     //h_i
+        int HashValue2;     //h_i+1
         int TotalRecords;
         HashTable() : round(0), PrevSize(2),NextSplit(0), Size(2),  TotalRecords(0) {
+            //We begine at round zero and size equal to 2
             HashBackets = (Bucket **) malloc(sizeof(Bucket *) * Size);
+            // Number of buckets is defined by hash table size
             for(int i = 0 ; i < Size ; i++ )
                 HashBackets[i] = new Bucket;
             HashValue1 = (int)(pow(2,round)) * Size;
             HashValue2 = (int)(pow(2,round + 1)) * Size;
-            }
-            void InsertItem(int BucketPos,Item * item){
+        }
+        void InsertItem(int BucketPos,Item * item){
             HashBackets[BucketPos]->InsertIem(item);
             TotalRecords++;
         }

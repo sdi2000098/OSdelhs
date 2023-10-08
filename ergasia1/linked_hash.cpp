@@ -57,7 +57,7 @@ class Bucket {
                 return NULL;
             return NextBucket->FindRecord(Pin);
         }
-        int Change(int Pin){  //Changes vote to yes
+        int Change(int Pin){
             for(int i = 0 ; i< KeysPerBucket;i++){
                 if(Records[i] == NULL)
                     return ERROR;
@@ -82,63 +82,80 @@ class Bucket {
         }
 };
 
-class HashTable {  
+class HashTable {
     private: 
         int round;
-        int PrevSize;  //This variable indicates the previous size of the table in which hash functions changed value 
-        Bucket ** HashBackets;  //Array of hash buckets 
+        int PrevSize;
+        Bucket ** HashBackets;
     public : 
-        int NextSplit;     //Points to the bucket that is going to be split if needed 
-        int Size;       // Current size of hash table
-        int HashValue1;     //h_i
-        int HashValue2;     //h_i+1
+        int NextSplit;
+        int Size;
+        int HashValue1;
+        int HashValue2;
         int TotalRecords;
         HashTable() : round(0), PrevSize(2),NextSplit(0), Size(2),  TotalRecords(0) {
-            //We begine at round zero and size equal to 2
             HashBackets = (Bucket **) malloc(sizeof(Bucket *) * Size);
-            // Number of buckets is defined by hash table size
             for(int i = 0 ; i < Size ; i++ )
-                HashBackets[i] = new Bucket;
+            HashBackets[i] = new Bucket;
             HashValue1 = (int)(pow(2,round)) * Size;
-            //h = 2^round * size
             HashValue2 = (int)(pow(2,round + 1)) * Size;
         }
-        void InsertItem(int BucketPos,Item * item){    //Inserts item to the given bucket
+        void InsertItem(int BucketPos,Item * item){
             HashBackets[BucketPos]->InsertIem(item);
-            TotalRecords++;
+            
         }
         void Split(){
             HashBackets = (Bucket**) realloc(HashBackets, sizeof(Bucket *) * ++Size);
+            HashBackets[Size-1] = new Bucket;
             HashBackets[NextSplit]->Split();
             Bucket * NextBucket = HashBackets[NextSplit]->NextBucket, * PrevBucket = HashBackets[NextSplit],*temp;
             if (NextBucket != NULL){
                 do
                 {
                     if(NextBucket->ItemsStored == 0){
-                        if (PrevBucket != NULL)
-                            PrevBucket->NextBucket = NULL;
-                        temp = NextBucket->NextBucket;
-                        delete NextBucket;
-                        NextBucket = temp;
-                        PrevBucket = NULL;
+                        PrevBucket->NextBucket = NULL;
+                        temp = NextBucket;
+                        NextBucket = NextBucket->NextBucket;
+                        free(temp);
                     }
                     else{
                         PrevBucket = NextBucket;
                         NextBucket = NextBucket->NextBucket;
                     }
-
                 } while (NextBucket != NULL);
-                
             }
             if (Size == 2*PrevSize){
+                HashValue1 *=2 ;
+                HashValue2 *= 2;
                 round++;
                 NextSplit = 0;
                 PrevSize = Size;
+                
             }
             else
                 NextSplit++;
-            HashValue1 = (int)(pow(2,round)) * Size;
-            HashValue2 = (int)(pow(2,round + 1)) * Size;
+            
+            
+        }
+        void PrintAll(void){
+            printf("We are in size      %d    h1 = %d      h2 = %d\n",Size,HashValue1,HashValue2);
+            for (int i = 0;i<Size;i++){
+                printf("for bucket %d we have : ",i);
+                Bucket * temp = HashBackets[i];
+                while (temp != NULL)
+                {
+                    for (int j = 0;j<KeysPerBucket;j++){
+                        if (temp->Records[j]!=NULL)
+                        {
+                            cout << temp->Records[j]->GetPin() << "  ";
+                        }
+                        
+                    }
+                    temp=temp->NextBucket;
+                }
+                cout <<"\n";
+            }
+            cout << "#########################################\n";
         }
         int Find(int ItemPos, int Pin){
             return HashBackets[ItemPos]->Find(Pin);
@@ -164,7 +181,7 @@ void Bucket::Split(){
         if (temp == NULL)
             break;
         Records[i] =NULL;
-        int ItemPos = temp->GetPin() % MyHash->HashValue1;
+        int ItemPos = temp->GetPin() % MyHash->HashValue2;
         MyHash->InsertItem(ItemPos,temp);
     }
     if(NextBucket != NULL)
@@ -187,16 +204,22 @@ void Insert (Item  * item) {
     if (ItemPos < MyHash->NextSplit)
         ItemPos = item->GetPin() % MyHash->HashValue2;
     MyHash->InsertItem(ItemPos,item);
+    MyHash->TotalRecords++;
     double L = (double)MyHash->TotalRecords/ (double)(MyHash->Size * KeysPerBucket);
     if (L > 0.75)
-        MyHash->Split();
+        MyHash->Split();    
 }
 
 int Find(int Pin){          // Returns 0 if record is displayed ERROR otherwise
     int ItemPos = Pin % MyHash->HashValue1;
     if (ItemPos < MyHash->NextSplit)
         ItemPos = Pin % MyHash->HashValue2;
-    return MyHash->Find(ItemPos,Pin);
+    int RetrurnValue = MyHash->Find(ItemPos,Pin);
+    if (RetrurnValue == ERROR){
+        cout << "There is no candiatte with Pin : " << Pin << "\n";
+        return ERROR;
+    }
+    return 0;
 }
 Item * FindRecord(int Pin){
     int ItemPos = Pin % MyHash->HashValue1;

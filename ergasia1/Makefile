@@ -1,6 +1,6 @@
 # Compiler and compiler flags
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall
+CXXFLAGS = -std=c++11 -Wall -g
 
 # Source files
 SRCS = linked_hash.cpp reverse_list.cpp voters.cpp mvote.cpp

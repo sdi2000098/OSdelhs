@@ -10,4 +10,5 @@
     int Find(int Pin);
     int ChangeItem(int Pin);
     void ExitHash(void);
+    Item * FindRecord(int);
 #endif 

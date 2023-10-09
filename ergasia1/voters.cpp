@@ -1,12 +1,10 @@
 #include <cstring>
 #include <iostream>
 #include "linked_hash.h"
-
-
+#define ERROR -1
 using namespace std;
 
     static int VotersNumber = 0, HaveVoted = 0;
-    
     Voter::Voter(int Pin, const char * surname, const char * name, int PostCode) 
         :Pin(Pin), PostCode(PostCode), HasVoted(false)
         {
@@ -25,31 +23,35 @@ using namespace std;
         }
             
         void Voter::DisplayVoter(){
-            cout << "Pin : " << Pin;
-            cout << "Name : " << name;
-            cout << "Surname : " << surname;
-            cout << "Post Code : " << PostCode;
-            cout << "Voted : " << HasVoted;
+            cout << Pin << " " << surname << " " << name << " " << PostCode << " " ;
+            if (HasVoted == true)
+                cout << "Y\n";
+            else
+                cout << "N\n";
         }
 
         int Voter::GetZip(){
             return PostCode;
         }
-        void Voter::SetVote(){
+        int Voter::SetVote(){
             if (HasVoted){
-                cout << "Already Voted";
-                return;
+                cout << "Canditate with pin " << Pin << "has already voted\n";
+                return ERROR;
             }
+            cout << Pin << " marked voted\n";
             HaveVoted++;
             HasVoted = true;
+            return 0;
         }
     
     typedef Voter Item;
 
     int Initialize (int KeysPerBucket){
-        return Initialize(KeysPerBucket);
+        return InitializeHash(KeysPerBucket);
     }
     int CreateVoter(int Pin, char * surname, char * name, int PostCode){
+        if (FindRecord(Pin) != NULL)
+            return ERROR;
         Item * ToInsert = new Voter(Pin,surname,name,PostCode);
         Insert(ToInsert);
         VotersNumber++;

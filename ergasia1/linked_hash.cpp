@@ -31,7 +31,7 @@ class Bucket {
                 Records[ItemsStored++] = item;              //Bucket is not full, insert to the free space
             }
         }
-        void Split();            //Will be defined later
+        Bucket * Split();            //Will be defined later
         int Find(int Pin){
             for(int i = 0 ; i< KeysPerBucket;i++){       //Check all records in the bucket
                 if(Records[i] == NULL)
@@ -107,16 +107,15 @@ class HashTable {
         void Split(){
             HashBackets = (Bucket**) realloc(HashBackets, sizeof(Bucket *) * ++Size);
             HashBackets[Size-1] = new Bucket;
-            HashBackets[NextSplit]->Split();
-            Bucket * NextBucket = HashBackets[NextSplit]->NextBucket, * PrevBucket = HashBackets[NextSplit],*temp;
+            HashBackets[NextSplit] = HashBackets[NextSplit]->Split();
+            Bucket * NextBucket = HashBackets[NextSplit]->NextBucket, * PrevBucket = HashBackets[NextSplit];
             if (NextBucket != NULL){
                 do
                 {
                     if(NextBucket->ItemsStored == 0){
                         PrevBucket->NextBucket = NULL;
-                        temp = NextBucket->NextBucket;
                         delete NextBucket;
-                        NextBucket = temp;
+                        break;
                     }
                     else{
                         PrevBucket = NextBucket;
@@ -173,7 +172,7 @@ class HashTable {
         }
 };
 
-void Bucket::Split(){
+Bucket * Bucket::Split(){
     Item * temp;
     ItemsStored = 0;
     for (int i = 0; i< KeysPerBucket;i++){
@@ -185,7 +184,8 @@ void Bucket::Split(){
         MyHash->InsertItem(ItemPos,temp);
     }
     if(NextBucket != NULL)
-        NextBucket->Split();
+        NextBucket = NextBucket->Split();
+    return this;
 }
 
 

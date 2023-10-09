@@ -5,18 +5,28 @@
 #define STRING_LENGTH 100
 
 using namespace std;
-int main(int argc, char **argv){
-    if (argc != 5){
-        cout << "Wrong number of arguments!\n";
-    }
+int main(void){
+
     ifstream file;
-    file.open(argv[2]);
+    file.open("voters50.csv");
     char * s1 = (char*)malloc(STRING_LENGTH*sizeof(char));
+    int i = 0,pin,zip;
+    char * name = (char*) malloc (sizeof(char)*STRING_LENGTH), *surname =(char*) malloc(sizeof(char)*STRING_LENGTH);
     if (file.is_open() ){
         while( file.good()){
+            
+            zip = -1;
+            pin = -1;
             file >> s1;
-            cout << s1 << "\n";
+            pin = atoi(s1);
+            file >> name;
+            file >> surname;
+            file >> s1;
+            zip = atoi(s1);
+            if (file.good())
+                i++;
         }
     }
+    cout << i <<"\n";
     return 0;
 }

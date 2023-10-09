@@ -123,12 +123,25 @@ void Operate(void) {
                 char * s1 = (char*)malloc(STRING_LENGTH*sizeof(char));
                 while(file.good()){
                     file >> s1;
-                    SetVoted(atoi(s1));
+                    bool flag = false;
+                    for (int i = 0; i < (int)strlen(s1); i++) {
+                        if(!isdigit(s1[i])){
+                            cout<< "Malformed Input\n";
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if(flag)
+                        continue;
+                    if ( SetVoted(atoi(s1)) == ERROR)
+                        cout << s1 << " does not exist\n";
                 }
                 free(s1);
+                file.close();
             }
             else
-                cout << tokens[i]<< "could not be opened\n";
+                cout << tokens[1]<< " could not be opened\n";
+            
         }
         else if (strcmp(tokens[0],"v") == 0)
         {
@@ -136,7 +149,7 @@ void Operate(void) {
                 cout << "Wrong number of arguments in input\n";
                 continue;
             }
-            cout << "Total number of participants that have already voted : " << NumberOfYesVoters() << "\n";
+            cout << "Voted so far " << NumberOfYesVoters() << "\n";
         }
         else if (strcmp(tokens[0],"o") == 0)
         {
@@ -163,7 +176,7 @@ void Operate(void) {
                 cout << "Wrong number of arguments in input\n";
                 continue;
             }
-            cout << "The percentage of those who have voted is : " << (double)NumberOfYesVoters()/(double)NumberOfVoters() << "\n";
+            cout << (double)NumberOfYesVoters()/(double)NumberOfVoters() << "\n";
 
         }
         else if (strcmp(tokens[0],"z") == 0)
@@ -189,9 +202,22 @@ void Operate(void) {
     free(Input);
 }
 int main(int argc, char **argv){
-    if (argc != 5){
+    if (argc != 5 || argc != 7){
         cout << "Wrong number of arguments!\n";
         return ERROR;
+    }
+    if ((strcmp(argv[1],argv[3]) == 0) || (strcmp(argv[3],argv[5]) == 0) || (strcmp(argv[1],argv[5]) == 0)){
+        cout << "Wrong arguments\n";
+        return ERROR;
+    }
+    char * InputFile = NULL;
+    for(int i = 1; i<argc; i++){
+        if (strcmp(argv[i],"-f") == 0){
+            InputFile = (char*)malloc(sizeof(char)*strlen(argv[i]));
+            strcpy(InputFile,argv[i]);
+        }
+        else if(strcmp(argv[i],"-b"))
+
     }
     for (int i = 0; i < (int)strlen(argv[4]); i++) {
       if(! isdigit(argv[4][i])){
@@ -221,10 +247,12 @@ int main(int argc, char **argv){
             file >> surname;
             file >> s1;
             zip = atoi(s1);
-            CreateVoter(pin,surname,name,zip);
+            if (file.good())
+                CreateVoter(pin,surname,name,zip);
         }
         free(name);
         free(surname);
+        file.close();
     }
     else{
         cout << "Could not open file " << argv[2] << "\n";

@@ -79,7 +79,7 @@ int VotersFromZip(int Zip){
     {
         if(temp->Zip == Zip){
             ItemNode * temp2 = temp->Items;
-            std::cout << "For the Zip code " << Zip << " there are " << temp->NumberOfItems << " voters :\n";
+            std::cout << temp->NumberOfItems << " voted in " << Zip << "\n";
             while(temp2 != NULL){
                 temp2->item->DisplayVoter();
                 temp2 = temp2->Next;
@@ -100,7 +100,7 @@ void DisplayZips(void){
     ZipNode * temp = Head ;
     while (temp!=NULL)
     {
-        std::cout << "There are voters from zip " << temp->Zip << ", total : " << temp->NumberOfItems << "\n";
+        std::cout << temp->Zip << " : " << temp->NumberOfItems << "\n";
         temp = temp->Next;
     }
 }

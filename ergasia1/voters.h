@@ -17,7 +17,7 @@
             ~Voter();
             int GetPin();
             void DisplayVoter();
-            void SetVote();
+            int SetVote();
             int GetZip();
         private : 
             int Pin,PostCode;

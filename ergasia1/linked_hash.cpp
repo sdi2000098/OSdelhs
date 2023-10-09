@@ -5,9 +5,9 @@
 #define ERROR -1
 using namespace std;
 
-static int KeysPerBucket;
+static int KeysPerBucket =0;
 class HashTable;
-static HashTable * MyHash;
+static HashTable * MyHash = NULL;
 
 class Bucket {
     public :
@@ -16,7 +16,9 @@ class Bucket {
         Bucket * NextBucket;        //Pointer to next bucket
         int ItemsStored;            //#items stored in bucket
         Bucket() : ItemsStored(0){
-            Records = (Item**)malloc(KeysPerBucket*sizeof(Item*));
+            Records = new Item*[KeysPerBucket];
+            for (int i = 0 ; i < KeysPerBucket ; i++ )
+                Records[i] = NULL;
             NextBucket = NULL;
         }
         void InsertIem(Item * item){
@@ -61,24 +63,22 @@ class Bucket {
             for(int i = 0 ; i< KeysPerBucket;i++){
                 if(Records[i] == NULL)
                     return ERROR;
-                if (Records[i]->GetPin() == Pin){
-                    Records[i]->SetVote();
-                    return 0;
-                }
+                if (Records[i]->GetPin() == Pin)
+                    return Records[i]->SetVote();
             }
             if (NextBucket == NULL)
                 return ERROR;
-            return NextBucket->Find(Pin);
+            return NextBucket->Change(Pin);
         }
         ~Bucket(){
-            for (int i = 0 ; i < KeysPerBucket;i++){
+            for (int i = 0 ; i< KeysPerBucket;i++){
                 if (Records[i] == NULL)
                     break;
                 delete Records[i];
             }
+            delete [] Records;
             if (NextBucket != NULL)
                 delete NextBucket;
-            delete [] Records;
         }
 };
 
@@ -96,13 +96,13 @@ class HashTable {
         HashTable() : round(0), PrevSize(2),NextSplit(0), Size(2),  TotalRecords(0) {
             HashBackets = (Bucket **) malloc(sizeof(Bucket *) * Size);
             for(int i = 0 ; i < Size ; i++ )
-            HashBackets[i] = new Bucket;
+                HashBackets[i] = new Bucket;
             HashValue1 = (int)(pow(2,round)) * Size;
             HashValue2 = (int)(pow(2,round + 1)) * Size;
         }
         void InsertItem(int BucketPos,Item * item){
             HashBackets[BucketPos]->InsertIem(item);
-            
+        
         }
         void Split(){
             HashBackets = (Bucket**) realloc(HashBackets, sizeof(Bucket *) * ++Size);
@@ -114,9 +114,9 @@ class HashTable {
                 {
                     if(NextBucket->ItemsStored == 0){
                         PrevBucket->NextBucket = NULL;
-                        temp = NextBucket;
-                        NextBucket = NextBucket->NextBucket;
-                        free(temp);
+                        temp = NextBucket->NextBucket;
+                        delete NextBucket;
+                        NextBucket = temp;
                     }
                     else{
                         PrevBucket = NextBucket;
@@ -169,7 +169,7 @@ class HashTable {
         ~HashTable(){
             for(int i = 0 ; i< Size; i++)
                 delete HashBackets[i];
-            delete [] HashBackets;
+            free(HashBackets);
         }
 };
 
@@ -180,8 +180,8 @@ void Bucket::Split(){
         temp = Records[i];
         if (temp == NULL)
             break;
-        Records[i] =NULL;
         int ItemPos = temp->GetPin() % MyHash->HashValue2;
+        Records[i] =NULL;
         MyHash->InsertItem(ItemPos,temp);
     }
     if(NextBucket != NULL)
@@ -216,7 +216,7 @@ int Find(int Pin){          // Returns 0 if record is displayed ERROR otherwise
         ItemPos = Pin % MyHash->HashValue2;
     int RetrurnValue = MyHash->Find(ItemPos,Pin);
     if (RetrurnValue == ERROR){
-        cout << "There is no candiatte with Pin : " << Pin << "\n";
+        cout << "Participant " << Pin << " not in cohort\n";
         return ERROR;
     }
     return 0;
@@ -231,7 +231,8 @@ int ChangeItem(int Pin){
     int ItemPos = Pin % MyHash->HashValue1;
     if (ItemPos < MyHash->NextSplit)
         ItemPos = Pin % MyHash->HashValue2;
-    MyHash->Change(ItemPos,Pin);
+    if (MyHash->Change(ItemPos,Pin) == ERROR)
+        return ERROR;
     Item * ToInsert = FindRecord(Pin);
     if (ToInsert == NULL){
         cout << "There is no candiatte with Pin : " << Pin << "\n";

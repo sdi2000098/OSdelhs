@@ -18,16 +18,18 @@ void ShowPrompt( void ){
     cout << " perc   (Percentage of people that voted)\n";
     cout << "z <zipcode>   (Voters of a specific zipcode)\n";
     cout << "o   (Display all zipcodes )\n";
+    cout << "prompt (Show prompt)\n";
     cout << "exit\n";
 
 }
 
 void Operate(void) {
     char * Input = (char*)malloc(sizeof(char)*100);
+    char **tokens =(char **) malloc(6*sizeof(char *));
     while (1)
     {
         cin.getline(Input,100);
-        char **tokens =(char **) malloc(6*sizeof(char *));
+        
         int i = 0;
         tokens[i] = strtok(Input," ");
         while (tokens[i] != NULL)
@@ -41,14 +43,21 @@ void Operate(void) {
         }
         if ( i == 6)
             continue;
-
-
-        
         if (strcmp(tokens[0],"l") == 0){
             if ( i != 2){
                 cout << "Wrong number of arguments in input\n";
                 continue;
             }
+            bool flag = false;
+            for (int i = 0; i < (int)strlen(tokens[1]); i++) {
+                if(!isdigit(tokens[1][i])){
+                    cout<< "Malformed Pin\n";
+                    flag = true;
+                    break;;
+                }
+            }
+            if(flag)
+                continue;
             PrintVoter(atoi(tokens[1]));
         }
         else if (strcmp(tokens[0],"i") == 0)
@@ -57,7 +66,31 @@ void Operate(void) {
                 cout << "Wrong number of arguments in input\n";
                 continue;
             }
-            CreateVoter(atoi(tokens[1]),tokens[2],tokens[3],atoi(tokens[4]));
+            bool flag = false;
+            for (int i = 0; i < (int)strlen(tokens[1]); i++) {
+                if(!isdigit(tokens[1][i])){
+                    cout<< "Malformed Input\n";
+                    flag = true;
+                    break;;
+                }
+            }
+            if(flag)
+                continue;
+            flag = false;
+            for (int i = 0; i < (int)strlen(tokens[4]); i++) {
+                if(!isdigit(tokens[4][i])){
+                    cout<< "Malformed Input\n";
+                    flag = true;
+                    break;;
+                }
+            }
+            if(flag)
+                continue;
+            
+            if ( CreateVoter(atoi(tokens[1]),tokens[2],tokens[3],atoi(tokens[4])) == ERROR)
+                cout << tokens[1] << " already exist\n";
+            else
+                cout << "Inserted" << " " << tokens[1] << " " << tokens[2] << " " << tokens[3]<< " "  << tokens[4] << " N\n" ;
         }
         else if (strcmp(tokens[0],"m") == 0)
         {
@@ -65,7 +98,18 @@ void Operate(void) {
                 cout << "Wrong number of arguments in input\n";
                 continue;
             }
-            SetVoted(atoi(tokens[1]));
+            bool flag = false;
+            for (int i = 0; i < (int)strlen(tokens[1]); i++) {
+                if(!isdigit(tokens[1][i])){
+                    cout<< "Malformed Input\n";
+                    flag = true;
+                    break;;
+                }
+            }
+            if(flag)
+                continue;
+            if ( SetVoted(atoi(tokens[1])) == ERROR)
+                cout << tokens[1] << " does not exist\n";
         }
         else if (strcmp(tokens[0],"bv") == 0)
         {
@@ -81,8 +125,10 @@ void Operate(void) {
                     file >> s1;
                     SetVoted(atoi(s1));
                 }
-                delete s1;
+                free(s1);
             }
+            else
+                cout << tokens[i]<< "could not be opened\n";
         }
         else if (strcmp(tokens[0],"v") == 0)
         {
@@ -90,7 +136,7 @@ void Operate(void) {
                 cout << "Wrong number of arguments in input\n";
                 continue;
             }
-            cout << "Total number of participants that have already voted : " << NumberOfVoters() << "\n";
+            cout << "Total number of participants that have already voted : " << NumberOfYesVoters() << "\n";
         }
         else if (strcmp(tokens[0],"o") == 0)
         {
@@ -106,7 +152,7 @@ void Operate(void) {
                 cout << "Wrong number of arguments in input\n";
                 continue;
             }
-            delete [] tokens;
+            free(tokens);
             cout << "Exinitng...\n";
             ExitProg();
             break;
@@ -126,14 +172,21 @@ void Operate(void) {
                 cout << "Wrong number of arguments in input\n";
                 continue;
             }
-            PrintAllFromZip(atoi(tokens[i]));
+            PrintAllFromZip(atoi(tokens[1]));
+        }
+        else if (strcmp(tokens[0],"prompt") == 0){
+            if ( i != 1){
+                cout << "Wrong number of arguments in input\n";
+                continue;
+            }
+            ShowPrompt();
         }
         else {
             cout << "Wrong input!\n";
         }
         
     }
-    
+    free(Input);
 }
 int main(int argc, char **argv){
     if (argc != 5){
@@ -147,15 +200,21 @@ int main(int argc, char **argv){
       }
 
    }
+    
     if (Initialize(atoi(argv[4])))
         return ERROR;
+    
     ifstream file;
     file.open(argv[2]);
     char * s1 = (char*)malloc(STRING_LENGTH*sizeof(char));
     if (file.is_open() ){
         int zip,pin;
         char * name = (char*) malloc (sizeof(char)*STRING_LENGTH), *surname =(char*) malloc(sizeof(char)*STRING_LENGTH);
+        int i = 0 ;
         while( file.good()){
+            i++;
+            zip = -1;
+            pin = -1;
             file >> s1;
             pin = atoi(s1);
             file >> name;
@@ -164,14 +223,14 @@ int main(int argc, char **argv){
             zip = atoi(s1);
             CreateVoter(pin,surname,name,zip);
         }
-        delete name;
-        delete surname;
+        free(name);
+        free(surname);
     }
     else{
         cout << "Could not open file " << argv[2] << "\n";
         return ERROR;
     }
-    delete s1;
+    free(s1);
     ShowPrompt();
     Operate();
     return 0;

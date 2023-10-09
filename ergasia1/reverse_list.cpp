@@ -12,14 +12,13 @@ struct ZipNode{
     ItemNode * Items;
 };
 
-
-static int TotalZips;
+static int TotalZips = 0;
 static ZipNode * Head = NULL;
 
 ZipNode * CreateNewZip(Item * item, ZipNode * Next,int Zip){
     TotalZips++;
-    ZipNode * ToReturn = (ZipNode*)malloc(sizeof(ZipNode));
-    ToReturn->Items = (ItemNode *)malloc(sizeof(ItemNode));
+    ZipNode * ToReturn = new ZipNode;
+    ToReturn->Items = new ItemNode;
     ToReturn->Items->item = item;
     ToReturn->Items->Next = NULL;
     ToReturn->Next = Next;
@@ -45,18 +44,24 @@ void InsertList(Item * item){
                 prev = next;
                 next = next->Next;
             }
-            prev->Next = (ItemNode*)malloc(sizeof(ItemNode));
+            prev->Next = new ItemNode;
             prev->Next->item = item;
             prev->Next->Next = NULL;
-            if (prev != NULL){          //If null we are in head node and we are done
+            if (PrevZip != NULL){          //If null we are in head node and we are done
                 PrevZip->Next = temp->Next;
                 ZipNode * Position2 = Head, * Position1 = NULL; 
-                while (Position2 != NULL && Position2->NumberOfItems > temp->NumberOfItems){
+                while (Position2 != NULL && Position2->NumberOfItems >= temp->NumberOfItems){
                     Position1 = Position2;
                     Position2 = Position2->Next;
                 }
-                Position1->Next = temp;
-                temp->Next = Position2;
+                if (Position1 == NULL) {            //Temp needs to be head node
+                    Head = temp;
+                    temp->Next = Position2;
+                }
+                else{
+                    Position1->Next = temp;
+                    temp->Next = Position2;
+                }
 
             }
             return;
@@ -65,7 +70,7 @@ void InsertList(Item * item){
         temp = temp->Next;
 
     }
-    temp = CreateNewZip(item,NULL,item->GetZip());
+    PrevZip->Next = CreateNewZip(item,NULL,item->GetZip());
 }
 
 int VotersFromZip(int Zip){

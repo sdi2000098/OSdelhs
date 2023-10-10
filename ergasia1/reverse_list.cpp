@@ -11,7 +11,6 @@ struct ZipNode{
     ZipNode * Next;
     ItemNode * Items;
 };
-
 static int TotalZips = 0;
 static ZipNode * Head = NULL;
 
@@ -107,7 +106,8 @@ void DisplayZips(void){
 
 
 
-void ExitList(void){
+int ExitList(void){
+    int BytesDeleted = 0;
     ZipNode * temp = Head,*ToDelete;
     while (temp != NULL)
     {
@@ -116,10 +116,13 @@ void ExitList(void){
         {
             ToDelete2 = temp2;
             temp2 = temp2->Next;
+            BytesDeleted += (int)(sizeof(ToDelete2));
             delete ToDelete2;
         }
         ToDelete = temp;
         temp = temp->Next;
+        BytesDeleted += (int)(sizeof(ToDelete));
         delete ToDelete;
     }
+    return BytesDeleted;
 }

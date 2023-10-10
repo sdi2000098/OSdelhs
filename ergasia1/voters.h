@@ -1,7 +1,7 @@
 #ifndef VOTERS
 
     #define VOTERS
-    int Initialize (int KeysPerBucket);
+    int Initialize (int KeysPerBucket,int InitialSize);
     int CreateVoter(int Pin, char * surname, char * name, int PostCode);
     int PrintVoter(int Pin);
     int SetVoted(int Pin);

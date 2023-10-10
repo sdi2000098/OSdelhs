@@ -132,7 +132,7 @@ void Operate(void) {
                         }
                     }
                     if(flag)
-                        continue;
+                        break;;
                     if ( SetVoted(atoi(s1)) == ERROR)
                         cout << s1 << " does not exist\n";
                 }
@@ -166,8 +166,8 @@ void Operate(void) {
                 continue;
             }
             free(tokens);
-            cout << "Exinitng...\n";
-            ExitProg();
+            cout << "Exitng...\n";
+            cout << ExitProg() << " of Bytes Released\n";
             break;
         }
         else if (strcmp(tokens[0],"perc") == 0)
@@ -202,36 +202,71 @@ void Operate(void) {
     free(Input);
 }
 int main(int argc, char **argv){
-    if (argc != 5 || argc != 7){
+    if (argc != 5 && argc != 7){
         cout << "Wrong number of arguments!\n";
         return ERROR;
     }
-    if ((strcmp(argv[1],argv[3]) == 0) || (strcmp(argv[3],argv[5]) == 0) || (strcmp(argv[1],argv[5]) == 0)){
-        cout << "Wrong arguments\n";
-        return ERROR;
-    }
-    char * InputFile = NULL;
-    for(int i = 1; i<argc; i++){
-        if (strcmp(argv[i],"-f") == 0){
-            InputFile = (char*)malloc(sizeof(char)*strlen(argv[i]));
-            strcpy(InputFile,argv[i]);
+    if (argc == 7){
+        if ((strcmp(argv[1],argv[3]) == 0) || (strcmp(argv[3],argv[5]) == 0) || (strcmp(argv[1],argv[5]) == 0)){
+            cout << "Wrong arguments\n";
+            return ERROR;
         }
-        else if(strcmp(argv[i],"-b"))
+    }
+    else{
+        if (strcmp(argv[1],argv[3]) == 0){
+            cout << "Wrong arguments\n";
+            return ERROR;
+        }
+    }
+    char * InputFile = NULL,*KeysPerBucket = NULL, *InitialSize = NULL;
+    for(int i = 1; i<argc; i+=2){
+        if (strcmp(argv[i],"-f") == 0){
+            InputFile = (char*)malloc(sizeof(char)*strlen(argv[i+1])+1);
+            strcpy(InputFile,argv[i+1]);
+        }
+        else if(strcmp(argv[i],"-b") == 0){
+            KeysPerBucket = (char*)malloc(sizeof(char)*strlen(argv[i+1])+1);
+            strcpy(KeysPerBucket,argv[i+1]);
+        }
+        else if(strcmp(argv[i],"-m") == 0){
+            InitialSize = (char*)malloc(sizeof(char)*strlen(argv[i+1])+1);
+            strcpy(InitialSize,argv[i+1]);
+        }
+        else{
+            cout << "Wrong arguments\n";
+            return ERROR;
+        }
 
     }
-    for (int i = 0; i < (int)strlen(argv[4]); i++) {
-      if(! isdigit(argv[4][i])){
-        cout<<"Expected an int for keys per bucket but got : " << argv[4] << "\n";
+    if ( KeysPerBucket == NULL || InputFile == NULL) {
+        cout << "-f and -b flags not found\n";
+        return ERROR;
+    }
+    for (int i = 0; i < (int)strlen(KeysPerBucket); i++) {
+      if(! isdigit(KeysPerBucket[i])){
+        cout<<"Expected an int greater than zero for keys per bucket but got : " << KeysPerBucket << "\n";
         return ERROR;
       }
-
    }
-    
-    if (Initialize(atoi(argv[4])))
-        return ERROR;
-    
+   if (InitialSize != NULL){
+        for (int i = 0; i < (int)strlen(InitialSize); i++) {
+            if(! isdigit(InitialSize[i])){
+                cout<<"Expected an int greater than zero for Initial Size but got : " << InitialSize << "\n";
+                return ERROR;
+            }
+        }
+        if (Initialize(atoi(KeysPerBucket),atoi(InitialSize)))
+            return ERROR;
+    }
+    else{
+        if (Initialize(atoi(KeysPerBucket),2))
+            return ERROR;
+    }
     ifstream file;
-    file.open(argv[2]);
+    file.open(InputFile);
+    free(InitialSize);
+    free(InputFile);
+    free(KeysPerBucket);
     char * s1 = (char*)malloc(STRING_LENGTH*sizeof(char));
     if (file.is_open() ){
         int zip,pin;
@@ -255,7 +290,7 @@ int main(int argc, char **argv){
         file.close();
     }
     else{
-        cout << "Could not open file " << argv[2] << "\n";
+        cout << "Could not open file " << InputFile << "\n";
         return ERROR;
     }
     free(s1);

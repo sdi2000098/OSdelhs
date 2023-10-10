@@ -46,8 +46,8 @@ using namespace std;
     
     typedef Voter Item;
 
-    int Initialize (int KeysPerBucket){
-        return InitializeHash(KeysPerBucket);
+    int Initialize (int KeysPerBucket, int InitialSize){
+        return InitializeHash(KeysPerBucket,InitialSize);
     }
     int CreateVoter(int Pin, char * surname, char * name, int PostCode){
         if (FindRecord(Pin) != NULL)
@@ -82,7 +82,7 @@ using namespace std;
         return VotersFromZip(Zip);
     }
     int ExitProg(void){
-        ExitHash();
-        ExitList();
-        return 0;
+        int BytesDeleted = ExitHash();
+        BytesDeleted+= ExitList();
+        return BytesDeleted;
     }

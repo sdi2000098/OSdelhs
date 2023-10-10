@@ -5,10 +5,10 @@
 #include "reverse_list.h"
 
     typedef Voter Item;
-    int InitializeHash(int KeysPerBucket);
+    int InitializeHash(int KeysPerBucket,int );
     void Insert(Item * item);
     int Find(int Pin);
     int ChangeItem(int Pin);
-    void ExitHash(void);
+    int ExitHash(void);
     Item * FindRecord(int);
 #endif 

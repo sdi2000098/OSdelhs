@@ -8,7 +8,7 @@ using namespace std;
 static int KeysPerBucket =0;
 class HashTable;
 static HashTable * MyHash = NULL;
-
+int BytesDeleted = 0;
 class Bucket {
     public :
         Item ** Records;                    
@@ -74,11 +74,15 @@ class Bucket {
             for (int i = 0 ; i< KeysPerBucket;i++){
                 if (Records[i] == NULL)
                     break;
+                BytesDeleted += int(sizeof(Records[i]));
                 delete Records[i];
             }
+            BytesDeleted += int(sizeof(Records));
             delete [] Records;
-            if (NextBucket != NULL)
+            if (NextBucket != NULL){
+                BytesDeleted += int(sizeof(NextBucket));
                 delete NextBucket;
+            }
         }
 };
 
@@ -93,7 +97,7 @@ class HashTable {
         int HashValue1;
         int HashValue2;
         int TotalRecords;
-        HashTable() : round(0), PrevSize(2),NextSplit(0), Size(2),  TotalRecords(0) {
+        HashTable(int InitialSize) : round(0), PrevSize(InitialSize),NextSplit(0), Size(InitialSize),  TotalRecords(0) {
             HashBackets = (Bucket **) malloc(sizeof(Bucket *) * Size);
             for(int i = 0 ; i < Size ; i++ )
                 HashBackets[i] = new Bucket;
@@ -105,7 +109,7 @@ class HashTable {
         
         }
         void Split(){
-            HashBackets = (Bucket**) realloc(HashBackets, sizeof(Bucket *) * ++Size);
+            HashBackets = (Bucket**) realloc(HashBackets, sizeof(Bucket *)* (++Size));
             HashBackets[Size-1] = new Bucket;
             HashBackets[NextSplit] = HashBackets[NextSplit]->Split();
             Bucket * NextBucket = HashBackets[NextSplit]->NextBucket, * PrevBucket = HashBackets[NextSplit];
@@ -136,26 +140,6 @@ class HashTable {
             
             
         }
-        void PrintAll(void){
-            printf("We are in size      %d    h1 = %d      h2 = %d\n",Size,HashValue1,HashValue2);
-            for (int i = 0;i<Size;i++){
-                printf("for bucket %d we have : ",i);
-                Bucket * temp = HashBackets[i];
-                while (temp != NULL)
-                {
-                    for (int j = 0;j<KeysPerBucket;j++){
-                        if (temp->Records[j]!=NULL)
-                        {
-                            cout << temp->Records[j]->GetPin() << "  ";
-                        }
-                        
-                    }
-                    temp=temp->NextBucket;
-                }
-                cout <<"\n";
-            }
-            cout << "#########################################\n";
-        }
         int Find(int ItemPos, int Pin){
             return HashBackets[ItemPos]->Find(Pin);
         }
@@ -166,8 +150,11 @@ class HashTable {
             return HashBackets[ItemPos]->Change(Pin);
         }
         ~HashTable(){
-            for(int i = 0 ; i< Size; i++)
+            for(int i = 0 ; i< Size; i++){
+                BytesDeleted += int(sizeof(HashBackets[i]));
                 delete HashBackets[i];
+            }
+            BytesDeleted += int(sizeof(HashBackets));
             free(HashBackets);
         }
 };
@@ -189,13 +176,17 @@ Bucket * Bucket::Split(){
 }
 
 
-int InitializeHash (int x){
+int InitializeHash (int x,int InitialSize){
     if (x <= 0){
         cout << "Keys per Bucket must be an integer greater than zero, you inserted " << x << "\n";
         return ERROR;
     }
+    if (InitialSize <= 0 ){
+        cout << "Initial Size must be an integer greater than zero, you inserted " << x << "\n";
+        return ERROR;
+    }
     KeysPerBucket = x;
-    MyHash = new HashTable;
+    MyHash = new HashTable(InitialSize);
     return 0;
 }
 
@@ -242,6 +233,8 @@ int ChangeItem(int Pin){
     return 0;
 }
 
-void ExitHash(void){
+int ExitHash(void){
+    BytesDeleted = (int)(sizeof(MyHash));
     delete MyHash;
+    return BytesDeleted;
 }

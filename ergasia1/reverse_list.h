@@ -8,6 +8,6 @@
     int VotersFromZip(int Zip);
     void DisplayZips(void);
     int PrintAllFromZip(int Zip);
-    void ExitList(void);
+    int ExitList(void);
     
 #endif

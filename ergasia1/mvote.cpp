@@ -1,10 +1,12 @@
 #include <iostream>
 #include <fstream>
 #include "voters.h"
+//Voters.h will be used to interact with the database
 #include <string.h>
 
 #define ERROR -1
 #define STRING_LENGTH 100
+#define INITIAL_SIZE 2
 
 using namespace std;
 
@@ -24,11 +26,18 @@ void ShowPrompt( void ){
 }
 
 void Operate(void) {
-    char * Input = (char*)malloc(sizeof(char)*100);
-    char **tokens =(char **) malloc(6*sizeof(char *));
+    char * Input,**tokens;
+    if ( (Input = (char*)malloc(sizeof(char)*STRING_LENGTH)) == NULL){         //Holds the user's input
+        cout << "Could not allocate memory\n";
+        return;
+    }           
+    if ( ( tokens =(char **) malloc(6*sizeof(char *))) == NULL){          //Break the input to maximum 6 tokens, more than 6 will not correspond to a valid operation
+        cout << "Could not allocate memory\n";
+        return;
+    }
     while (1)
     {
-        cin.getline(Input,100);
+        cin.getline(Input,STRING_LENGTH);
         
         int i = 0;
         tokens[i] = strtok(Input," ");
@@ -37,7 +46,7 @@ void Operate(void) {
             i++;
             if (i == 6){
                 cout << "Too Many Arguments\n";
-                break;;
+                break;
             }
             tokens[i] = strtok(NULL," ");
         }
@@ -49,11 +58,12 @@ void Operate(void) {
                 continue;
             }
             bool flag = false;
-            for (int i = 0; i < (int)strlen(tokens[1]); i++) {
+            for (int i = 0; i < (int)strlen(tokens[1]); i++) {         
+                 //A simple way to check if token is positive number, checking each char if is digit or not
                 if(!isdigit(tokens[1][i])){
                     cout<< "Malformed Pin\n";
                     flag = true;
-                    break;;
+                    break;
                 }
             }
             if(flag)
@@ -67,27 +77,28 @@ void Operate(void) {
                 continue;
             }
             bool flag = false;
-            for (int i = 0; i < (int)strlen(tokens[1]); i++) {
+            for (int i = 0; i < (int)strlen(tokens[1]); i++) {      //Token[1] is pin
                 if(!isdigit(tokens[1][i])){
                     cout<< "Malformed Input\n";
                     flag = true;
-                    break;;
+                    break;
                 }
             }
             if(flag)
                 continue;
             flag = false;
-            for (int i = 0; i < (int)strlen(tokens[4]); i++) {
+            for (int i = 0; i < (int)strlen(tokens[4]); i++) { // Token[4] is zip code
                 if(!isdigit(tokens[4][i])){
                     cout<< "Malformed Input\n";
                     flag = true;
-                    break;;
+                    break;
                 }
             }
             if(flag)
                 continue;
             
-            if ( CreateVoter(atoi(tokens[1]),tokens[2],tokens[3],atoi(tokens[4])) == ERROR)
+            if ( CreateVoter(atoi(tokens[1]),tokens[2],tokens[3],atoi(tokens[4])) == ERROR)     
+            //Create Voter returns ERROR if voter exists, 0 otherwise
                 cout << tokens[1] << " already exist\n";
             else
                 cout << "Inserted" << " " << tokens[1] << " " << tokens[2] << " " << tokens[3]<< " "  << tokens[4] << " N\n" ;
@@ -103,12 +114,13 @@ void Operate(void) {
                 if(!isdigit(tokens[1][i])){
                     cout<< "Malformed Input\n";
                     flag = true;
-                    break;;
+                    break;
                 }
             }
             if(flag)
                 continue;
             if ( SetVoted(atoi(tokens[1])) == ERROR)
+            ///SetVoted returns ERROR if voter exists, 0 otherwise
                 cout << tokens[1] << " does not exist\n";
         }
         else if (strcmp(tokens[0],"bv") == 0)
@@ -120,7 +132,11 @@ void Operate(void) {
             ifstream file;
             file.open(tokens[1]);
             if (file.is_open()){
-                char * s1 = (char*)malloc(STRING_LENGTH*sizeof(char));
+                char * s1;
+                if  (( s1= (char*)malloc(STRING_LENGTH*sizeof(char)) ) == NULL){
+                    cout << "Could not allocate memory\n";
+                    return;
+                }
                 while(file.good()){
                     file >> s1;
                     bool flag = false;
@@ -187,7 +203,7 @@ void Operate(void) {
             }
             PrintAllFromZip(atoi(tokens[1]));
         }
-        else if (strcmp(tokens[0],"prompt") == 0){
+        else if (strcmp(tokens[0],"prompt") == 0){          //Prompt addition
             if ( i != 1){
                 cout << "Wrong number of arguments in input\n";
                 continue;
@@ -203,16 +219,19 @@ void Operate(void) {
 }
 int main(int argc, char **argv){
     if (argc != 5 && argc != 7){
+        //Program only accepts 2 or 3 flags with a value following them
         cout << "Wrong number of arguments!\n";
         return ERROR;
     }
     if (argc == 7){
+        //we have 3 flags, we check whether any 2 of them are same
         if ((strcmp(argv[1],argv[3]) == 0) || (strcmp(argv[3],argv[5]) == 0) || (strcmp(argv[1],argv[5]) == 0)){
             cout << "Wrong arguments\n";
             return ERROR;
         }
     }
     else{
+        //we have 2 flags, check if they are same
         if (strcmp(argv[1],argv[3]) == 0){
             cout << "Wrong arguments\n";
             return ERROR;
@@ -220,16 +239,26 @@ int main(int argc, char **argv){
     }
     char * InputFile = NULL,*KeysPerBucket = NULL, *InitialSize = NULL;
     for(int i = 1; i<argc; i+=2){
+        //Check all flags and get their value
         if (strcmp(argv[i],"-f") == 0){
-            InputFile = (char*)malloc(sizeof(char)*strlen(argv[i+1])+1);
+            if ( ( InputFile = (char*)malloc(sizeof(char)*strlen(argv[i+1])+1) ) ==NULL){
+                cout << "Could not allocate memory\n";
+                return ERROR;
+            }
             strcpy(InputFile,argv[i+1]);
         }
         else if(strcmp(argv[i],"-b") == 0){
-            KeysPerBucket = (char*)malloc(sizeof(char)*strlen(argv[i+1])+1);
+            if ( ( KeysPerBucket = (char*)malloc(sizeof(char)*strlen(argv[i+1])+1) ) == NULL ){
+                cout << "Could not allocate memory\n";
+                return ERROR;
+            }
             strcpy(KeysPerBucket,argv[i+1]);
         }
         else if(strcmp(argv[i],"-m") == 0){
-            InitialSize = (char*)malloc(sizeof(char)*strlen(argv[i+1])+1);
+            if ( ( InitialSize = (char*)malloc(sizeof(char)*strlen(argv[i+1])+1) ) == NULL ){
+                cout << "Could not allocate memory\n";
+                return ERROR;
+            }
             strcpy(InitialSize,argv[i+1]);
         }
         else{
@@ -239,6 +268,7 @@ int main(int argc, char **argv){
 
     }
     if ( KeysPerBucket == NULL || InputFile == NULL) {
+        //Flags that were needed didnt get initialized in the previous for loop
         cout << "-f and -b flags not found\n";
         return ERROR;
     }
@@ -255,11 +285,11 @@ int main(int argc, char **argv){
                 return ERROR;
             }
         }
-        if (Initialize(atoi(KeysPerBucket),atoi(InitialSize)))
+        if (Initialize(atoi(KeysPerBucket),atoi(InitialSize)) == ERROR)
             return ERROR;
     }
     else{
-        if (Initialize(atoi(KeysPerBucket),2))
+        if (Initialize(atoi(KeysPerBucket), INITIAL_SIZE) == ERROR)
             return ERROR;
     }
     ifstream file;
@@ -267,22 +297,32 @@ int main(int argc, char **argv){
     free(InitialSize);
     free(InputFile);
     free(KeysPerBucket);
-    char * s1 = (char*)malloc(STRING_LENGTH*sizeof(char));
+    char * s1 ;
+    if ((s1= (char*)malloc(STRING_LENGTH*sizeof(char))) == NULL ){
+        cout << "Could not allocate memory\n";
+        return ERROR;
+    }
     if (file.is_open() ){
         int zip,pin;
-        char * name = (char*) malloc (sizeof(char)*STRING_LENGTH), *surname =(char*) malloc(sizeof(char)*STRING_LENGTH);
+        char * name, * surname;
+        if ( ( name = (char*) malloc (sizeof(char)*STRING_LENGTH) ) == NULL){
+            cout << "Could not allocate memory\n";
+            return ERROR;
+        }
+        if ( (surname =(char*) malloc(sizeof(char)*STRING_LENGTH)) == NULL ){
+            cout << "Could not allocate memory\n";
+            return ERROR;
+        }
         int i = 0 ;
         while( file.good()){
             i++;
-            zip = -1;
-            pin = -1;
             file >> s1;
             pin = atoi(s1);
             file >> name;
             file >> surname;
             file >> s1;
             zip = atoi(s1);
-            if (file.good())
+            if (file.good())        //Insert only if 4 tokens were read and file didnt reach EOF
                 CreateVoter(pin,surname,name,zip);
         }
         free(name);

@@ -1,6 +1,8 @@
 #include "reverse_list.h"
 #include <iostream>
 #define ERROR -1
+using namespace std;
+
 struct ItemNode{
     Item * item;
     ItemNode * Next;
@@ -11,13 +13,22 @@ struct ZipNode{
     ZipNode * Next;
     ItemNode * Items;
 };
-static int TotalZips = 0;
-static ZipNode * Head = NULL;
+static int TotalZips = 0;       //Holds the total number of ZipNodes
+static ZipNode * Head = NULL;   //Head of the ZipNode list
 
 ZipNode * CreateNewZip(Item * item, ZipNode * Next,int Zip){
+    //Function that allocates memory for a new ZipNode, initializes some values and return a pointer to it
+    //It also gets as parameter a pointer to the item that is being inserted
     TotalZips++;
-    ZipNode * ToReturn = new ZipNode;
-    ToReturn->Items = new ItemNode;
+    ZipNode * ToReturn;
+    if ((ToReturn = new ZipNode) ==NULL){
+        cout << "Could not allocate memory\n";
+        return NULL;
+    }
+    if ( (ToReturn->Items = new ItemNode) == NULL){
+        cout << "Could not allocate memory\n";
+        return NULL;
+    }
     ToReturn->Items->item = item;
     ToReturn->Items->Next = NULL;
     ToReturn->Next = Next;
@@ -28,28 +39,41 @@ ZipNode * CreateNewZip(Item * item, ZipNode * Next,int Zip){
 
 void InsertList(Item * item){
     if (Head == NULL){
+        //No items have been inserted yet, we need to initialize the head
         TotalZips = 0;
-        Head = CreateNewZip(item,NULL,item->GetZip());
+        if ( (Head = CreateNewZip(item,NULL,item->GetZip())) == NULL){
+            cout << "Could not allocate memory\n";
+            return ;
+        }
         return;
     }
     ZipNode * temp = Head,*PrevZip = NULL;
     while(temp != NULL){
         if(temp->Zip == item->GetZip()){
-            temp->NumberOfItems++;
+            //item needs to be inserted to temp ZipNode
+            temp->NumberOfItems++;      //Insert it
             ItemNode * prev = temp->Items;
             ItemNode * next = prev->Next;
             while (next != NULL)
             {
                 prev = next;
                 next = next->Next;
+                //Iterate through th lsit of Items that belong to temp zipnode and add it to the end of the list
             }
-            prev->Next = new ItemNode;
-            prev->Next->item = item;
+            if ((prev->Next = new ItemNode) ==NULL){
+                cout << "Could not allocate memory\n";
+                return ;
+            }
+            prev->Next->item = item;        //New Item Node initalization
             prev->Next->Next = NULL;
-            if (PrevZip != NULL){          //If null we are in head node and we are done
+            if (PrevZip != NULL){          
+                //If null we are in head node and we are done
+                //since the zip node we inserted the item was already the one with the biggest number of items
                 PrevZip->Next = temp->Next;
                 ZipNode * Position2 = Head, * Position1 = NULL; 
+                //After the next while loop, temp ZipNode need to be between Position1 and Position 2 ZipNodes
                 while (Position2 != NULL && Position2->NumberOfItems >= temp->NumberOfItems){
+                    //iterate ZipNode list untill node at positon 2 has smaller number of Items than the temp ZipNode
                     Position1 = Position2;
                     Position2 = Position2->Next;
                 }
@@ -58,6 +82,7 @@ void InsertList(Item * item){
                     temp->Next = Position2;
                 }
                 else{
+                    //Insert temp between the two nodes
                     Position1->Next = temp;
                     temp->Next = Position2;
                 }
@@ -69,10 +94,15 @@ void InsertList(Item * item){
         temp = temp->Next;
 
     }
-    PrevZip->Next = CreateNewZip(item,NULL,item->GetZip());
+    if ( (PrevZip->Next = CreateNewZip(item,NULL,item->GetZip())) == NULL){
+        //Means that we reached end of list, and no ZipNode with item->zip exists
+        cout << "Could not allocate memory\n";
+        return ;
+    }
 }
 
 int VotersFromZip(int Zip){
+    //Find ZipNode with such zip
     ZipNode * temp = Head;
     while (temp != NULL)
     {
@@ -92,6 +122,7 @@ int VotersFromZip(int Zip){
 }
 
 void DisplayZips(void){
+    //Simply print the ZipNode list
     if (Head == NULL){
         std::cout << "No one has voted yet!\n";
         return;
@@ -107,6 +138,7 @@ void DisplayZips(void){
 
 
 int ExitList(void){
+    //Easy destruction of list
     int BytesDeleted = 0;
     ZipNode * temp = Head,*ToDelete;
     while (temp != NULL)

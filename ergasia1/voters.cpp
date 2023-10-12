@@ -4,13 +4,21 @@
 #define ERROR -1
 using namespace std;
 
+
+    //Pretty straight forward implementation, no comments needed
     static int VotersNumber = 0, HaveVoted = 0;
     Voter::Voter(int Pin, const char * surname, const char * name, int PostCode) 
         :Pin(Pin), PostCode(PostCode), HasVoted(false)
         {
-            this->name = new char[strlen(name) + 1];
+            if ( (this->name = new char[strlen(name) + 1]) == NULL){
+                cout << "Could not allocate memory\n";
+                return ;
+            }
             strcpy(this->name, name);
-            this->surname = new char[strlen(surname) + 1];
+            if ( (this->surname = new char[strlen(surname) + 1]) == NULL){
+                cout << "Could not allocate memory\n";
+                return ;
+            }
             strcpy(this->surname, surname);
         }
         Voter::~Voter(){
@@ -52,7 +60,11 @@ using namespace std;
     int CreateVoter(int Pin, char * surname, char * name, int PostCode){
         if (FindRecord(Pin) != NULL)
             return ERROR;
-        Item * ToInsert = new Voter(Pin,surname,name,PostCode);
+        Item * ToInsert;
+        if ( (ToInsert = new Voter(Pin,surname,name,PostCode)) == NULL){
+            cout << "Could not allocate memory\n";
+            return ERROR;
+        }
         Insert(ToInsert);
         VotersNumber++;
         return 0;

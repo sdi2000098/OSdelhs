@@ -110,7 +110,7 @@ int VotersFromZip(int Zip){
             ItemNode * temp2 = temp->Items;
             std::cout << temp->NumberOfItems << " voted in " << Zip << "\n";
             while(temp2 != NULL){
-                temp2->item->DisplayVoter();
+                cout << temp2->item->GetPin() << "\n";
                 temp2 = temp2->Next;
             }
             return 0;

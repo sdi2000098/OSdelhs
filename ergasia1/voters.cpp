@@ -43,8 +43,8 @@ using namespace std;
         }
         int Voter::SetVote(){
             if (HasVoted){
-                cout << "Canditate with pin " << Pin << "has already voted\n";
-                return ERROR;
+                cout << "Canditate with pin " << Pin << " has already voted\n";
+                return 0;
             }
             cout << Pin << " marked voted\n";
             HaveVoted++;
